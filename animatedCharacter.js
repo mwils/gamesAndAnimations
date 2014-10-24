@@ -1,12 +1,12 @@
 //see live version at www.wormsetc.com/games/wormy2.html
 
 // added move function to image properties and added some common variables to the constructor
-
 var images = {};
-loadImage("head2");
-loadImage("mid2");
-loadImage("tail2");
-function loadImage (name) {
+loadHero("head2");
+loadHero("mid2");
+loadHero("tail2");
+loadAsset("apple");
+function loadHero (name) {
 	images[name] = new Image();
 	images[name].onload = function() {
 		resourceLoaded();
@@ -28,11 +28,32 @@ function loadImage (name) {
 	  }
 	}; 
   }
-  
-var totalResources = 3;
+// Load all non main characters
+function loadAsset (name) {
+	images[name] = new Image();
+	images[name].onload = function() {
+		resourceLoaded();
+	}
+	images[name].src = "img/" + name + ".png";
+	images[name].moving = 1;
+	images[name].speed = 8;
+	images[name].spawnSpot = -200;
+	images[name].currentY = 120;
+	images[name].currentX = 0;
+	images[name].move = function () {
+		this.currentX += this.speed;
+		if (this.currentX > gameWidth) {
+			this.currentX = this.spawnSpot;
+			this.moving = 1;
+		}
+  	};
+}
+// waits till all resources are loaded 
+var totalResources = 4;
 var totalLoaded = 0;
 var fps = 30;
-
+var gameWidth = 1000;
+ 
 var eyeMax = 20;
 var eyeCurrent = eyeMax;
 var updateEyeTime = setInterval(updateTime, 1000/fps);
@@ -50,12 +71,14 @@ var chewFreq = 10500;
 var chewTime = 0;
 var chews = 0;
 // jumpBase number indicates resting number. inverse relation to height.
-var jumpBase = 10;
+var jumpBase = 12;
 var jumpCurrent = jumpBase;
 var jumpInc = 1;
 var jumping = 0;
 jumpX = 0;
 jumpDirection = 1;
+
+
 
 
 images.mid2.inc =.18;
@@ -66,8 +89,17 @@ images.head2.max = 4;
 
 images.tail2.inc = .12;
 images.tail2.max = 2;
-	
 
+//runs functions at setInterval of fps
+
+
+function resourceLoaded () {
+	totalLoaded +=1;
+	if (totalResources === totalLoaded) {
+		setInterval(redraw, 1000/fps);
+	}
+
+}
 
 function updateTime () { 
 	images.head2.move();
@@ -84,13 +116,24 @@ function updateTime () {
 	if (jumping === 1) {
 		jump();
 	}
+	if (images.apple.moving === 1) {
+		images.apple.move();
+	}
+	
 }
+// Key listeners
+
+window.addEventListener('keydown', function (e) {
+	if (e.keyCode == 38) {
+		jumping = 1;
+	}
+	console.log(e);
+}, true);
 
 function blink () {
 	eyeCurrent -=6;
 	if (eyeCurrent <= 1) {
 		eyeCurrent = eyeMax;
-		jumping = 1;
 		openTime = 0;
 		} 
 }
@@ -110,31 +153,24 @@ function blink () {
 // in order to simulate physics jumpCurrent starts at the highest number 
 // and decreases as the jump goes up. The number is squared and then added to the y axis
 function jump () {
-	jumpX = jumpCurrent*jumpCurrent -  jumpBase*jumpBase;
+	
 	if (jumpDirection === 1) {
 		jumpCurrent -= jumpInc;
-		console.log(jumpCurrent+ 'jumpCurUp');
 		if (jumpCurrent <= 0) {
 			jumpDirection = -1;
 		}		
 	} else {
 		jumpCurrent += jumpInc;
-		console.log(jumpCurrent + 'jumpCurDown');
 		if (jumpCurrent >= jumpBase) {
 			jumpCurrent = jumpBase;
 			jumping = 0;
 			jumpDirection = 1;
 		}
-	}	
+	}
+jumpX = jumpCurrent*jumpCurrent -  jumpBase*jumpBase;	
+
 }			
 
-function resourceLoaded () {
-	totalLoaded +=1;
-	if (totalResources === totalLoaded) {
-		setInterval(redraw, 1000/fps);
-	}
-
-}
 
 
 //start drawing
@@ -153,6 +189,8 @@ function redraw () {
 	drawEllipse(x+40+images.head2.current+images.mid2.current, y+62+jumpX, 10, eyeCurrent); //left
 	drawEllipse(x+60+images.head2.current+images.mid2.current, y+62+jumpX, 10, eyeCurrent); //right
 	drawEllipse(x+50+images.head2.current+images.mid2.current, y+82+jumpX, mouthW, mouthH); //mouth
+	ctx.drawImage(images["apple"], images.apple.currentX, images.apple.currentY);
+	
 }
 function drawEllipse(centerX, centerY, width, height) {
 	
