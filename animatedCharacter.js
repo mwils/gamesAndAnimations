@@ -1,9 +1,11 @@
-//see live version at www.wormsetc.com/games/wormy.html
+//see live version at www.wormsetc.com/games/wormy2.html
+
+// added move function to image properties and added some common variables to the constructor
 
 var images = {};
-loadImage("head");
-loadImage("mid");
-loadImage("tail");
+loadImage("head2");
+loadImage("mid2");
+loadImage("tail2");
 function loadImage (name) {
 	images[name] = new Image();
 	images[name].onload = function() {
@@ -15,7 +17,6 @@ function loadImage (name) {
 	images[name].move = function () {
 	  if (this.direction === 1) {
 		this.current += this.inc;
-		console.log(this.current);
 		if (this.current > this.max) {
 			this.direction = -1;			
 		}
@@ -32,47 +33,100 @@ var totalResources = 3;
 var totalLoaded = 0;
 var fps = 30;
 
-var eyeMax = 50;
+var eyeMax = 20;
 var eyeCurrent = eyeMax;
-var updateEyeTime = setInterval(updateOpenTime, 1000/fps);
+var updateEyeTime = setInterval(updateTime, 1000/fps);
 var blinkUpdateTime = 50;
 var blinkFreq = 4000;
 var openTime = 0;
 var random = 4000;
 
-images.mid.inc =.2;
-images.mid.max = 4;
+var mouthMinW = 15;
+var mouthMinH = 3;
+var mouthMaxH = 15;
+var mouthW = mouthMinW;
+var mouthH = mouthMinH;
+var chewFreq = 10500;
+var chewTime = 0;
+var chews = 0;
+// jumpBase number indicates resting number. inverse relation to height.
+var jumpBase = 10;
+var jumpCurrent = jumpBase;
+var jumpInc = 1;
+var jumping = 0;
+jumpX = 0;
+jumpDirection = 1;
 
-images.head.inc = .1; 
-images.head.max = 8;
 
-images.tail.inc = .3;
-images.tail.max = 10;
+images.mid2.inc =.18;
+images.mid2.max = 3;
 
+images.head2.inc = .1; 
+images.head2.max = 4;
 
-
-function updateOpenTime () { 
-	images.head.move();
-	images.tail.move();
-	images.mid.move();
-	openTime += blinkUpdateTime;
-	if (openTime > blinkFreq) {
-		blink();
+images.tail2.inc = .12;
+images.tail2.max = 2;
 	
-		blinkFreq = random;
-		console.log(blinkFreq);
-		
+
+
+function updateTime () { 
+	images.head2.move();
+	images.tail2.move();
+	images.mid2.move();
+	openTime += blinkUpdateTime;
+	chewTime += blinkUpdateTime;
+	if (chewTime > chewFreq) {
+		chew();
+	} 
+	if (openTime > blinkFreq) {
+		blink();	
+	}
+	if (jumping === 1) {
+		jump();
 	}
 }
 
 function blink () {
-	eyeCurrent -=12;
+	eyeCurrent -=6;
 	if (eyeCurrent <= 1) {
 		eyeCurrent = eyeMax;
+		jumping = 1;
 		openTime = 0;
 		} 
 }
-
+ function chew () {
+ 	if (chews <5) {
+ 		if (mouthH < mouthMaxH) {
+ 		mouthH ++;
+ 		}else {
+ 		mouthH = mouthMinH;
+ 		chews ++;
+ 		}
+ 	} else { 
+ 	chewTime = 0;
+ 	chews = 0;
+ 	}
+ }
+// in order to simulate physics jumpCurrent starts at the highest number 
+// and decreases as the jump goes up. The number is squared and then added to the y axis
+function jump () {
+	jumpX = jumpCurrent*jumpCurrent -  jumpBase*jumpBase;
+	if (jumpDirection === 1) {
+		jumpCurrent -= jumpInc;
+		console.log(jumpCurrent+ 'jumpCurUp');
+		if (jumpCurrent <= 0) {
+			jumpDirection = -1;
+		}		
+	} else {
+		jumpCurrent += jumpInc;
+		console.log(jumpCurrent + 'jumpCurDown');
+		if (jumpCurrent >= jumpBase) {
+			jumpCurrent = jumpBase;
+			jumping = 0;
+			jumpDirection = 1;
+		}
+	}	
+}			
 
 function resourceLoaded () {
 	totalLoaded +=1;
@@ -83,26 +137,22 @@ function resourceLoaded () {
 }
 
 
-
-
-
 //start drawing
 var c = document.getElementById("myCanvas");
 var ctx = c.getContext("2d");
 
-var charX = 1;
-var charY = 1;
+var x = 300;
+var y = 200;
 function redraw () {
-	var x = charX;
-	var y = charY;
 	
 	myCanvas.width = myCanvas.width;
-	drawEllipse(280+x, 300+y, 600, 30);
-	ctx.drawImage(images["mid"], x+images.mid.current, y);
-	ctx.drawImage(images["tail"], x+images.tail.current, y);
-	ctx.drawImage(images["head"], x+images.head.current, y);
-	drawEllipse(83 + x + images.head.current, 102 + y, 30, eyeCurrent); //left
-	drawEllipse(112 + x + images.head.current, 95 + y, 30, eyeCurrent); //right
+	drawEllipse(x+120+images.mid2.current, y+140, 270+jumpX/2, 20);
+	ctx.drawImage(images["tail2"], x+images.tail2.current+images.mid2.current, y+jumpX);
+	ctx.drawImage(images["mid2"], x+images.mid2.current, y+jumpX);
+	ctx.drawImage(images["head2"], x+images.head2.current+images.mid2.current, y+jumpX);
+	drawEllipse(x+40+images.head2.current+images.mid2.current, y+62+jumpX, 10, eyeCurrent); //left
+	drawEllipse(x+60+images.head2.current+images.mid2.current, y+62+jumpX, 10, eyeCurrent); //right
+	drawEllipse(x+50+images.head2.current+images.mid2.current, y+82+jumpX, mouthW, mouthH); //mouth
 }
 function drawEllipse(centerX, centerY, width, height) {
 	
