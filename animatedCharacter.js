@@ -93,7 +93,7 @@ function loadCommon (name) {
 	images[name].respawnClock = 0;
 	images[name].respawnTime = 2000;
 	images[name].collisionDetect = function () {
-		if(Math.abs(heroX-this.currentX) < 40 && Math.abs((this.currentY-40)-heroY) < 50) {
+		if(Math.abs(heroX-this.currentX) < 90 && Math.abs((this.currentY-40)-heroY) < 90) {
 		this.collisionEvent();
 		}
 	}
@@ -114,7 +114,7 @@ function loadFood (name) {
 			this.respawnClock = 0;
 			this.moving = 1;
 			this.respawnTime = getRandomArbitrary(3, 12)*1000;
-			this.currentY = getRandomArbitrary(70, 240); 
+			this.currentY = getRandomArbitrary(70, 300); 
 			this.speed = getRandomArbitrary(8, 30);
 		} else {
 		this.respawnClock += behaviorUpdateSpeed;
@@ -163,7 +163,7 @@ function loadBird (name) {
 			} else { 
 				this.directionX = 1;
 			}
-			this.speed = getRandomArbitrary(8, 20);
+			this.speed = getRandomArbitrary(8, 16);
 			this.currentY = -200;
 			if (this.currentX < leftBarrier+150) { 			//prevent bird from flying off screen edges
 				this.directionX = 1;
@@ -178,9 +178,11 @@ function loadBird (name) {
 		}
 	};
 	images[name].collisionEvent = function () {
-		this.takingWorm = 1;
-		wormEaten();
-		this.directionY = -1.2;
+		if (invincible === 0) {
+			this.takingWorm = 1;
+			this.directionY = -1.2;
+			wormEaten();
+		}
 	}
   	images[name].takeWorm = function () {
   		if (this.currentY > spawnSpotY+80) {
@@ -197,11 +199,10 @@ function loadBird (name) {
   	}
 }
 function loadHawk (name) {
-	images[name].speed = 10;
+	images[name].speed = 20;
 	images[name].takingWorm = 0;
 	images[name].move = function () {
 		this.currentY += this.speed;
-		console.log(this.currentY + " x " + this.currentX);
 		if (this.takingWorm === 1) {
 				this.takeWorm();
 		}
@@ -229,8 +230,10 @@ function loadHawk (name) {
 		}
 	};
 	images[name].collisionEvent = function () {
-		this.takingWorm = 1;
-		wormEaten();
+		if (invincible === 0) {
+			this.takingWorm = 1;
+			wormEaten();
+		}
 	}
   	images[name].takeWorm = function () {
   		if (this.currentY < gameHeight-80) {	
@@ -255,6 +258,8 @@ var fps = 30;
 var lives = 3;
 var score = 0;
 var updateFrequency = setInterval(updateTime, 1000/fps);
+// variable to insure wormEaten trigered only once
+takingWormLast = 0;
 // sets x boundry edge
 var gameWidth = 1000;
 var gameHeight = 700;
@@ -278,7 +283,7 @@ var chewFreq = 10500;
 var chewing = 0;
 var chews = 0;
 // jumpBase number indicates resting number. inverse relation to height.
-var jumpBase = 12;
+var jumpBase = 16;
 var jumpCurrent = jumpBase;
 var jumpInc = 1;
 var jumping = 0;
@@ -331,7 +336,7 @@ function updateTime () { 						//runs functions at setInterval of fps
 	*/
 	images.head2.clock();
 	images.tail2.clock();
-	images.mid2.clock();
+	images.mid2.clock(); 
 	images.apple.clock();
 	images.tomato.clock();
 	images.carrot.clock();
@@ -356,10 +361,26 @@ function updateTime () { 						//runs functions at setInterval of fps
 	}
 	
 }
+var invincible = 0;
 function wormEaten () {
+	if (invincible === 0) {
+		livesMinus();
+		invincible = 1;
+		setTimeout(function(){invincible = 0;},3000);
+	}
+}
+function livesMinus () {
 	lives -= 1;
 	document.getElementById("lives").innerHTML = "lives: " + lives;
+	if (lives <= 0) {
+		alert("You are dead. Refresh page to play again");
+		offsetX = 9999;
+		offsetY = 9999;
+	}
+		
 }
+
+	
 
 // Key listeners
 
