@@ -1,25 +1,29 @@
-//see live version at www.wormsetc.com/games/wormy2.html
+
+///www.wormsetc.com/game/wormy2.html
 /// By: Matthew Wilson
 /// Feel free to use this code with your own images
 /// This is my first programing project larger than a few lines, 
 /// If you see something that could have been done better, please feel to teach me a better way
 /// I am trying to learn best practices as I go
 ///
+//Will add Images.prototype to allow objects to have inheritance of common properties and reduce memory useage
+//console.time('total Time');
 var images = {};
-loadObject("head2");
-loadObject("mid2"); 
-loadObject("tail2");
-loadObject("apple");
-loadObject("tomato");
-loadObject("carrot");
-loadObject("bird");
-loadObject("hawk");
+loadObject("head2"),
+loadObject("mid2"), 
+loadObject("tail2"),
+loadObject("apple"),
+loadObject("tomato"),
+loadObject("carrot"),
+loadObject("bird"),
+loadObject("hawk"),
 loadObject("bkg");
+
 function loadObject (name) {
-	images[name] = new Image();
+	images[name] = new Image(),
 	images[name].onload = function() {
 		resourceLoaded();
-	};
+	},
 	images[name].src = "img/" + name + ".png";
 	switch (name) {
 	  case "head2":
@@ -41,17 +45,21 @@ function loadObject (name) {
 	  	loadCommon(name);
 	  	loadHawk(name);
 	  	break;
+	  case "ant":
+	  	loadCommon(name);
+	  	loadAnt(name);
+	  	break;
 	}
 }
 function loadHero (name) {
-	images[name].directionX = 1;
-	images[name].directionY = 1;
-	images[name].currentX = 1.8;
-	images[name].currentY = 0;
+	images[name].directionX = 1,
+	images[name].directionY = 1,
+	images[name].currentX = 1.8,
+	images[name].currentY = 0,
 	images[name].clock =function () {
 		this.animate();
 		this.updateCharPos();  
-	};
+	},
 	images[name].animate = function () {		// make worm squirm
 	  if (this.directionX === 1) {
 		this.currentX += this.incX;
@@ -75,29 +83,29 @@ function loadHero (name) {
 			this.directionY = 1;
 		}
 	  }
-	};
+	},
 	images[name].updateCharPos = function () {	// adds values to worm x & y from all movement functions
 		heroX = runX + offsetX + birdX; 	// birdX&(Y) allow bird to carry worm
 		heroY = jumpY + offsetY + birdY; 
 	};
 }
 function loadCommon (name) { 
-	images[name].moving = 0;
+	images[name].moving = 0,
 	images[name].clock = function () {
 		this.respawnOrMove();
 		this.collisionDetect();
-	};
-	images[name].speed = 13;
-	images[name].currentY = 70;
-	images[name].currentX = -250;
-	images[name].respawnClock = 0;
-	images[name].respawnTime = 2000;
+	},
+	images[name].speed = 13,
+	images[name].respawnClock = 0,
+	images[name].currentY = 70,
+	images[name].currentX = -250,
+	images[name].respawnTime = 2000,
 	images[name].collisionDetect = function () {
-		if(Math.abs(heroX-this.currentX) < 90 && Math.abs((this.currentY-40)-heroY) < 90) {
+		if(Math.abs(heroX-(this.currentX-30)) < 90 && Math.abs((this.currentY-40)-heroY) < 90) {
 		this.collisionEvent();
 		}
-	}
-};
+	};
+}
 function loadFood (name) {
 	//images[name].takingWorm = 0;
 	images[name].collisionEvent = function () {
@@ -105,7 +113,7 @@ function loadFood (name) {
 			chewing = 1;
 			this.currentX = spawnSpotX;
 			this.moving = 0;
-	}
+	},
 	images[name].respawnOrMove = function () {
 		if (this.moving === 1) {
 			this.move();
@@ -119,7 +127,7 @@ function loadFood (name) {
 		} else {
 		this.respawnClock += behaviorUpdateSpeed;
 		}
-	};
+	},
 	images[name].move = function () {
 		this.currentX += this.speed;
 		if (this.currentX > gameWidth) {
@@ -130,9 +138,10 @@ function loadFood (name) {
 }
 
 function loadBird (name) {
-	images[name].directionY = 1;
-	images[name].directionX = 1;
-	images[name].takingWorm = 0;
+	images[name].directionY = 1,
+	images[name].directionX = 1,
+	images[name].takingWorm = 0,
+	images[name].respawnTime = 6000,
 	images[name].move = function () {
 		this.currentY += this.speed*this.directionY;
 		this.currentX += this.speed/3*this.directionX;
@@ -147,7 +156,7 @@ function loadBird (name) {
 			this.directionY = 1;
 		}
 		
-	};
+	},
 	images[name].respawnOrMove = function () {
 		var rand; 							// random number to determine bird direction
 		if (this.moving === 1) {
@@ -155,7 +164,7 @@ function loadBird (name) {
 		} else if (this.respawnClock > this.respawnTime) {		// and the cycle parameters are set for next cycle
 			this.respawnClock = 0;
 			this.moving = 1;
-			this.respawnTime = getRandomArbitrary(3, 12)*1000;
+			this.respawnTime = getRandomArbitrary(3, 12)*2000/level;
 			this.currentX = getRandomArbitrary(leftBarrier, rightBarrier); 
 			rand = getRandomArbitrary(1, 10);
 			if (rand < 6) {
@@ -163,7 +172,7 @@ function loadBird (name) {
 			} else { 
 				this.directionX = 1;
 			}
-			this.speed = getRandomArbitrary(8, 16);
+			this.speed = getRandomArbitrary(5+level, 10+level);
 			this.currentY = -200;
 			if (this.currentX < leftBarrier+150) { 			//prevent bird from flying off screen edges
 				this.directionX = 1;
@@ -176,14 +185,14 @@ function loadBird (name) {
 		} else {
 		this.respawnClock += behaviorUpdateSpeed;
 		}
-	};
+	},
 	images[name].collisionEvent = function () {
 		if (invincible === 0) {
 			this.takingWorm = 1;
 			this.directionY = -1.2;
 			wormEaten();
 		}
-	}
+	},
   	images[name].takeWorm = function () {
   		if (this.currentY > spawnSpotY+80) {
 	  		birdX += this.speed/3*this.directionX;	
@@ -196,11 +205,11 @@ function loadBird (name) {
   			birdX = 0;						// respawn worm 
   			birdY = 0;
   		}
-  	}
+  	};
 }
 function loadHawk (name) {
-	images[name].speed = 20;
-	images[name].takingWorm = 0;
+	images[name].speed = 15,
+	images[name].takingWorm = 0,
 	images[name].move = function () {
 		this.currentY += this.speed;
 		if (this.takingWorm === 1) {
@@ -210,31 +219,34 @@ function loadHawk (name) {
 			this.moving = 0;
 			this.currentY = spawnSpotY;
 		}
-	};
+	},
 	images[name].respawnOrMove = function () {
 		if (this.moving === 1) {
 			this.move();
 		} else if (this.respawnClock > this.respawnTime) {
 			this.respawnClock = 0;
 			this.moving = 1;
-			this.respawnTime = getRandomArbitrary(3, 12)*2000;
+			this.respawnTime = getRandomArbitrary(3, 12)*4000/level;
+			this.currentX = getRandomArbitrary(leftBarrier, rightBarrier);
+			/*
 			if (getRandomArbitrary(1, 10) < 5) {
 				this.currentX = leftBarrier+20;
 			} else {
 				this.currentX = rightBarrier-180;
 			}
+			*/
 			this.currentY = spawnSpotY;
 			
 		} else {
 		this.respawnClock += behaviorUpdateSpeed;
 		}
-	};
+	},
 	images[name].collisionEvent = function () {
 		if (invincible === 0) {
 			this.takingWorm = 1;
-			wormEaten();
+			
 		}
-	}
+	},
   	images[name].takeWorm = function () {
   		if (this.currentY < gameHeight-80) {	
   			birdY += this.speed;
@@ -245,86 +257,152 @@ function loadHawk (name) {
   			this.takingWorm = 0;
   			birdX = 0;					// respawn worm 
   			birdY = 0;
+  			wormEaten();
   		}
-  	}
+  	};
 
 }
+function loadAnt (name) {
+	images[name].speed = 2+level,
+	images[name].takingWorm = 0,
+	images[name].currentY = 230,
+	images[name].respawnTime = 8000,
+	images[name].move = function () {
+		this.currentX += this.speed;
+		this.animateLegs();
+		if (this.takingWorm === 1) {
+				this.takeWorm();
+		}
+		if (this.currentX > gameWidth+100) { 				// trigger respawn
+			this.moving = 0;
+			this.currentX = spawnSpotX;
+			
+		}
+	},
+	images[name].animateLegs = function () {
+		if (legX <= -15) {
+			legXDir = 1;
+		} else if (legX >= 15) {
+			legXDir = -1;
+		}
+		legX += legXDir;
+	},
+	images[name].respawnOrMove = function () {
+		if (this.moving === 1) {
+			this.move();
+		} else if (this.respawnClock > this.respawnTime) {
+			this.respawnClock = 0;
+			this.moving = 1;
+			this.respawnTime = getRandomArbitrary(5, 12)*10000/level;
+		} else {
+		this.respawnClock += behaviorUpdateSpeed;
+		}
+	},
+	images[name].collisionEvent = function () {
+		jumpCurrent = jumpBase
+		if (invincible === 0) {
+			this.takingWorm = 1;
+			
+		}
+	},
+  	images[name].takeWorm = function () {
+  		if (this.currentX < gameWidth+80) {	
+  			birdX += this.speed;				//birdX is named poorly, It is a variable to enable an enemy to take the worm
+  			heroSpeed = 0;					// prevent worm movenent
+  			jumpY = 0;
+  			
+  		} else {
+  			this.takingWorm = 0;
+  			birdX = 0;
+  			birdY = 0;
+  			wormEaten();
+  		}
+  	};
+  	
+}					// respawn worm 
+  	
 	
+
 // waits till all resources are loaded 
-var totalResources = 9;
-var totalLoaded = 0;
+var totalResources = 9,
+totalLoaded = 0,
 //set frame rate
-var fps = 30;
-var lives = 3;
-var score = 0;
-var updateFrequency = setInterval(updateTime, 1000/fps);
+fps = 30,
+lives = 3,
+score = 0,
+level = 1,
+updateFrequency = setInterval(updateTime, 1000/fps),
 // variable to insure wormEaten trigered only once
-takingWormLast = 0;
+takingWormLast = 0,
 // sets x boundry edge
-var gameWidth = 1000;
-var gameHeight = 700;
-var bkgX = -1;
-var spawnSpotX = -500;
-var spawnSpotY = -500;
+gameWidth = 1000,
+gameHeight = 700,
+bkgX = -1,
+spawnSpotX = -500,
+spawnSpotY = -500,
 // sets eyes
-var eyeMax = 12;
-var eyeCurrent = eyeMax;
-var behaviorUpdateSpeed = 50;
-var blinkFreq = 4000;
-var openTime = 0;
-var blinking = 0;
+eyeMax = 12,
+eyeCurrent = eyeMax,
+behaviorUpdateSpeed = 50,
+blinkFreq = 4000,
+openTime = 0,
+blinking = 0,
 //sets mouth
-var mouthMinW = 12;
-var mouthMinH = 3;
-var mouthMaxH = 12;
-var mouthW = mouthMinW;
-var mouthH = mouthMinH;
-var chewFreq = 10500;
-var chewing = 0;
-var chews = 0;
+mouthMinW = 12,
+mouthMinH = 3,
+mouthMaxH = 12,
+mouthW = mouthMinW,
+mouthH = mouthMinH,
+chewFreq = 10500,
+chewing = 0,
+chews = 0,
 // jumpBase number indicates resting number. inverse relation to height.
-var jumpBase = 16;
-var jumpCurrent = jumpBase;
-var jumpInc = 1;
-var jumping = 0;
-var jumpY = 0;
-var jumpDirection = 1;
+jumpBase = 16,
+jumpCurrent = jumpBase,
+jumpInc = 1,
+jumping = 0,
+jumpY = 0,
+jumpDirection = 1,
 //sets movement variables for hero
-var leftBarrier = 0;
-var rightBarrier = 700;
-var heroSpeed = 0;
-var heroMaxSpeed = 20;
-var heroAcceleration = 4;
-var heroAcelDir = 1;
-var runX = 0;
-var heroX = 0;
-var heroY = 0;
-var offsetX = 300;
-var offsetY = 260;
+leftBarrier = 0,
+rightBarrier = 700,
+heroSpeed = 0,
+heroMaxSpeed = 20,
+heroAcceleration = 4,
+heroAcelDir = 1,
+friction = 1,
+runX = 0,
+heroX = 0,
+heroY = 0,
+offsetX = 300,
+offsetY = 260;
 //sets sqirm speed and limits
-images.mid2.incX = .4;
-images.mid2.maxX = 1.8;
-images.mid2.incY =.05;
-images.mid2.maxY = 1.5;
+images.mid2.incX = .4,
+images.mid2.maxX = 1.8,
+images.mid2.incY =.05,
+images.mid2.maxY = 1.5,
 
-images.head2.incX = .4; 
-images.head2.maxX = 1.8;
-images.head2.incY = .06; 
-images.head2.maxY = 1.5;
+images.head2.incX = .4, 
+images.head2.maxX = 1.8,
+images.head2.incY = .06, 
+images.head2.maxY = 1.5,
 
-images.tail2.incX = .4;
-images.tail2.maxX = 1.8;
-images.tail2.incY = .08;
+images.tail2.incX = .4,
+images.tail2.maxX = 1.8,
+images.tail2.incY = .08,
 images.tail2.maxY = 1.5;
 //Set variables and clocks for individual objects ie. ...bird : friend = 0
-var birdX = 0;
-var birdY = 0;
+var birdX = 0,
+birdY = 0,
+legX = 0,
+legXDir = 1;
+//console.timeEnd('total Time');	
 //sets number of loaded resources so game starts after loading all
 function resourceLoaded () {					
 	totalLoaded +=1;
 	if (totalResources === totalLoaded) {
 		setInterval(redraw, 1000/fps);
-		alert("Use the arrow keys to move around. Feed your worm vegitables and scraps, but watch out for birds!");
+		alert("Use the arrow keys to move around. Feed your worm vegitables and scraps, but watch out for birds! New life every 2000 points");
 	}
 
 }
@@ -334,14 +412,17 @@ function updateTime () { 						//runs functions at setInterval of fps
 		images.assets[i].clock();
 	} 
 	*/
-	images.head2.clock();
-	images.tail2.clock();
-	images.mid2.clock(); 
-	images.apple.clock();
-	images.tomato.clock();
-	images.carrot.clock();
-	images.bird.clock();
+	images.head2.clock(),
+	images.tail2.clock(),
+	images.mid2.clock(),
+	images.apple.clock(),
+	images.tomato.clock(),
+	images.carrot.clock(),
+	images.bird.clock(),
 	images.hawk.clock();
+	if(images.ant) {
+		images.ant.clock();
+	}
 	
 	openTime += behaviorUpdateSpeed;
 	if (chewing === 1) {
@@ -361,25 +442,6 @@ function updateTime () { 						//runs functions at setInterval of fps
 	}
 	
 }
-var invincible = 0;
-function wormEaten () {
-	if (invincible === 0) {
-		livesMinus();
-		invincible = 1;
-		setTimeout(function(){invincible = 0;},3000);
-	}
-}
-function livesMinus () {
-	lives -= 1;
-	document.getElementById("lives").innerHTML = "lives: " + lives;
-	if (lives <= 0) {
-		alert("You are dead. Refresh page to play again");
-		offsetX = 9999;
-		offsetY = 9999;
-	}
-		
-}
-
 	
 
 // Key listeners
@@ -398,6 +460,23 @@ window.addEventListener('keydown', function (e) {
 		heroAccelerate();
 	}
 }, true);
+// touch listeners
+window.addEventListener('load', function(){
+	document.getElementById('touchLeft').addEventListener('touchstart', function(e){
+		heroAcelDir = -1;
+		heroAccelerate();
+	}, false)
+	document.getElementById('touchRight').addEventListener('touchstart', function(e){
+		heroAcelDir = 1;
+		heroAccelerate();
+	}, false)
+	document.getElementById('touchJump').addEventListener('touchstart', function(e){
+		jumping = 1;
+	}, false)
+}, false);
+
+
+
 
 function blink () {
 	eyeCurrent -=6;
@@ -426,6 +505,7 @@ function blink () {
 function jump () {
 // check to see if going up or down	
 	if (jumpDirection === 1) {
+		friction = 0;
 		jumpCurrent -= jumpInc;
 		if (jumpCurrent <= 0) {
 			jumpDirection = -1;
@@ -436,6 +516,7 @@ function jump () {
 		if (jumpCurrent >= jumpBase) {
 			jumpCurrent = jumpBase;
 			jumping = 0;
+			friction = 1;
 			jumpDirection = 1;
 		}
 	}
@@ -446,7 +527,7 @@ jumpY = jumpCurrent*jumpCurrent -  jumpBase*jumpBase;
 function heroAccelerate () {
 	if (Math.abs(heroSpeed) < heroMaxSpeed) {
 		if (heroSpeed < heroAcceleration*2) {
-			heroSpeed +=heroAcceleration*3*heroAcelDir;
+			heroSpeed +=heroAcceleration*3*heroAcelDir;  //boost start
 		} else {
 			heroSpeed += heroAcceleration*heroAcelDir;
 		}
@@ -454,14 +535,16 @@ function heroAccelerate () {
 }
 //character hunting was prevented by using the 3way 1,-1,0 conditional to set speed to 0 if >-1<1
 // runX variable is added to heroX
+
+/* 
+// side scroll, however assets do not move with it
 function heroMove () {
-	runX += heroSpeed;
-	if (heroX > rightBarrier || heroX < leftBarrier) {
-		heroSpeed = 0;
-		if (heroX > rightBarrier+600 || heroX < leftBarrier-600) {
-			runX = 0;
-			heroX = 0;
-		}
+	if (heroX > rightBarrier && heroAcelDir === 1) {
+		bkgX -= heroSpeed;
+	} else if (heroX < leftBarrier && heroAcelDir === -1) { 
+		bkgX -= heroSpeed;
+	} else {
+		runX+= heroSpeed;
 	} 
 //decelerate
 	if (heroSpeed > 1) {
@@ -473,11 +556,83 @@ function heroMove () {
 		heroSpeed = 0;
 	}
 }
+*/
+
+function heroMove () {
+	if (heroX > leftBarrier && heroX < rightBarrier) {
+		runX += heroSpeed;
+	} else {
+		runX -= heroSpeed;
+		heroSpeed = 0;
+	} 
+//decelerate
+	if (heroSpeed > 1) {
+		heroSpeed -= heroAcceleration/5*friction;
+	} else if (heroSpeed < -1) {
+		heroSpeed += heroAcceleration/5*friction;
+//prevent hunting
+	} else { 
+		heroSpeed = 0;
+	}
+}
+
 function scorePoints () {
 	score += 250;
 	document.getElementById("score").innerHTML = "Score: " + score;
+	if (score%2000 === 0) {
+	nextLevel();
+	}
+}
+function nextLevel () {
+	level ++;
+	lives +=2;
+	document.getElementById("lives").innerHTML = "Lives: " + lives;
+	document.getElementById("level").innerHTML = "Level: " + level;
+	switch (level) {
+		case 2:
+		  loadObject("ant");
+		  break;
+		case 3: 
+		  bkgX -= 800;
+		  break;
+		case 6: 
+		  bkgX -= 800;
+		  break;
+		case 10:
+		  bkgX -=800;
+		  break;
+	}  
+}
+var invincible = 0;
+function wormEaten () {
+	if (invincible === 0) {
+		livesMinus();
+		invincible = 1;
+		setTimeout(function(){invincible = 0;},6000);
+	}
+}
+function livesMinus () {
+	lives -= 1;
+	document.getElementById("lives").innerHTML = "Lives: " + lives;
+	if (lives <= 0) {
+		gameOver();
+	}
+		
+}
+function gameOver () {
+    if (confirm("Game Over! Click OK to try again Cancel to see high scores.") == true) {
+        replay();
+    } else {
+        highScores();
+    }
 }
 
+function highScores () {
+	 window.location.assign("game-over.php");
+}
+function replay () {
+	 window.location.assign("wormy2.html");
+}
 
 // special functions for assets
 // bird dive function - did not like this so decided to make bird travel vertically only
@@ -506,18 +661,28 @@ images.bird.special = function () {
 };
 */		
 //start drawing
-var c = document.getElementById("myCanvas");
-var ctx = c.getContext("2d");
-
-var x = 300;
-var y = 200;
+var c = document.getElementById("myCanvas"),
+ctx = c.getContext("2d"),
+x = 300,
+y = 200;
+/*
+images.ant.drawLegs = function (a, b) {
+	ctx.beginPath();
+	ctx.moveTo(120, 120);
+	ctx.lineTo(340, 140);
+	ctx.stroke();
+}
+*/
 function redraw () {
-	
+	//console.time('draw');
 	myCanvas.width = myCanvas.width;
-	ctx.drawImage(images["bkg"], bkgX, -300); 							//draw background
+	ctx.drawImage(images["bkg"], bkgX, 0); 							//draw background
 	drawEllipse(images.apple.currentX+30, 360, 20+images.apple.currentY/2, 20); 			// apple shadow
 	drawEllipse(images.tomato.currentX+30, 360, 20+images.tomato.currentY/2, 20); 			//tomato shadow
-	drawEllipse(images.carrot.currentX+30, 360, 20+images.carrot.currentY/2, 20); 			//carrot shadow
+	drawEllipse(images.carrot.currentX+30, 360, 20+images.carrot.currentY/2, 20);			//carrot shadow
+	if (images.ant) {
+	drawEllipse(images.ant.currentX+80, 360, 20+images.ant.currentY/2, 20); 
+	}			//ant shadow		
 	drawEllipse(70+heroX, 100+offsetY, 120+heroY/3, 20);						// worm shadow
 	if (images.bird.currentY > -200) {								// prevent shadow when bird is high
 	drawEllipse(images.bird.currentX+50, 360, 50+images.bird.currentY/8, 20); }			//bird shadow
@@ -533,12 +698,28 @@ function redraw () {
 	ctx.drawImage(images["carrot"], images.carrot.currentX, images.carrot.currentY);		//carrot
 	ctx.drawImage(images["tomato"], images.tomato.currentX, images.tomato.currentY);		//tomato
 	ctx.drawImage(images.hawk, images.hawk.currentX, images.hawk.currentY);				//hawk
+	if (images.ant) {
+	ctx.drawImage(images["ant"], images.ant.currentX, images.ant.currentY);	
+	ctx.beginPath();
+	ctx.moveTo(images.ant.currentX + 80, images.ant.currentY + 90);					//rear ant leg
+	ctx.lineTo(images.ant.currentX + 80 - legX, images.ant.currentY + 115);
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(images.ant.currentX + 95, images.ant.currentY + 95);					//mid ant leg
+	ctx.lineTo(images.ant.currentX + 95 + legX, images.ant.currentY + 115);		
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(images.ant.currentX + 110, images.ant.currentY + 90);					//front ant leg
+	ctx.lineTo(images.ant.currentX + 110 - legX, images.ant.currentY + 115);
+	ctx.stroke();
+	}
 	if(images.bird.directionX === -1) {								//bird flying left
 		ctx.scale(-1, 1);
 		ctx.drawImage(images["bird"], images.bird.currentX*-1 -128, images.bird.currentY);
 	} else {											//bird flying right
 		ctx.drawImage(images["bird"], images.bird.currentX, images.bird.currentY);
 	}
+	//console.timeEnd('draw');
 }
 function drawEllipse(centerX, centerY, width, height) {
 	
